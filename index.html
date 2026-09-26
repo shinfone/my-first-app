@@ -1,11 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="theme-color" content="#101a31">
+    <title>Star Runner | 横スクロールアクション</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="game.js" defer></script>
 </head>
 <body>
-    ようこそ　私のページへ！
+    <main class="game-shell">
+        <header class="topbar">
+            <a class="brand" href="#" aria-label="Star Runner ホーム">
+                <span class="brand-mark" aria-hidden="true">✦</span>
+                <span>STAR RUNNER</span>
+            </a>
+            <p class="topbar-note">コインを集めて、ゴールを目指そう！</p>
+        </header>
+
+        <section class="game-card" aria-label="ゲーム画面">
+            <div class="game-heading">
+                <div>
+                    <p class="eyebrow">WORLD 01 — SKY ISLAND</p>
+                    <h1>星空ランナー</h1>
+                </div>
+                <div class="score" aria-live="polite">
+                    <span class="coin-icon" aria-hidden="true">●</span>
+                    <span id="coin-count">0</span><span class="score-total">/ 8</span>
+                </div>
+            </div>
+
+            <div class="canvas-wrap">
+                <canvas id="game" width="960" height="540" aria-label="星空を走ってゴールを目指すゲーム"></canvas>
+                <div class="game-overlay" id="game-overlay" hidden>
+                    <div class="overlay-card">
+                        <p class="eyebrow" id="overlay-eyebrow">MISSION COMPLETE</p>
+                        <h2 id="overlay-title">ゴール！</h2>
+                        <p id="overlay-message">お見事！</p>
+                        <button id="restart-button" type="button">もう一度プレイ <span aria-hidden="true">↻</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-footer">
+                <p id="game-status" aria-live="polite">準備OK！ゴールを目指そう。</p>
+                <button class="reset-button" id="reset-button" type="button">最初から <span aria-hidden="true">↻</span></button>
+            </div>
+        </section>
+
+        <section class="how-to-play" aria-label="操作方法">
+            <div class="section-title">
+                <span class="title-icon" aria-hidden="true">⌘</span>
+                <div>
+                    <h2>操作方法</h2>
+                    <p>走って、跳んで、星を集めよう。</p>
+                </div>
+            </div>
+            <div class="controls">
+                <div class="control-item">
+                    <span class="key-group"><kbd>←</kbd><kbd>→</kbd></span>
+                    <span>移動</span>
+                </div>
+                <div class="control-item">
+                    <span class="key-group"><kbd>Space</kbd><kbd>↑</kbd></span>
+                    <span>ジャンプ</span>
+                </div>
+                <div class="control-item touch-hint">
+                    <span class="key-group"><span class="touch-key">◀</span><span class="touch-key">▶</span><span class="touch-key">⤒</span></span>
+                    <span>スマホ操作</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="touch-controls" aria-label="タッチ操作">
+            <button type="button" data-control="left" aria-label="左へ移動">◀</button>
+            <button type="button" data-control="right" aria-label="右へ移動">▶</button>
+            <button type="button" data-control="jump" aria-label="ジャンプ">⤒</button>
+        </div>
+        <footer class="page-footer">小さな冒険に出かけよう <span aria-hidden="true">✦</span></footer>
+    </main>
 </body>
 </html>
