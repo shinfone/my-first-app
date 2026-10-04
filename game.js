@@ -49,6 +49,11 @@ const coinPositions = [
     { x: 2665, y: 260 },
 ];
 
+const enemyPositions = [
+    { x: 370, minX: 345, maxX: 435 },
+    { x: 805, minX: 790, maxX: 925 },
+];
+
 const stars = Array.from({ length: 65 }, (_, index) => ({
     x: (index * 173 + 31) % WORLD_WIDTH,
     y: 24 + ((index * 67) % 270),
@@ -59,6 +64,7 @@ const stars = Array.from({ length: 65 }, (_, index) => ({
 const input = { left: false, right: false, jump: false };
 let player;
 let coins;
+let enemies;
 let cameraX = 0;
 let elapsed = 0;
 let gameState = "playing";
@@ -67,6 +73,15 @@ let lastTime = 0;
 function resetGame() {
     player = { x: 70, y: GROUND_Y - 44, width: 32, height: 44, vx: 0, vy: 0, grounded: true };
     coins = coinPositions.map((coin) => ({ ...coin, collected: false }));
+    enemies = enemyPositions.map((enemy) => ({
+        ...enemy,
+        y: GROUND_Y - 26,
+        width: 34,
+        height: 26,
+        speed: 38,
+        direction: 1,
+        alive: true,
+    }));
     cameraX = 0;
     gameState = "playing";
     overlay.hidden = true;
@@ -140,6 +155,15 @@ function finish(won) {
 function update(delta) {
     if (gameState !== "playing") return;
 
+    for (const enemy of enemies) {
+        if (!enemy.alive) continue;
+        enemy.x += enemy.speed * enemy.direction * delta;
+        if (enemy.x <= enemy.minX || enemy.x + enemy.width >= enemy.maxX) {
+            enemy.direction *= -1;
+            enemy.x = Math.max(enemy.minX, Math.min(enemy.maxX - enemy.width, enemy.x));
+        }
+    }
+
     const previousBottom = player.y + player.height;
     player.vx = (Number(input.right) - Number(input.left)) * RUN_SPEED;
     player.x = Math.max(0, Math.min(WORLD_WIDTH - player.width, player.x + player.vx * delta));
@@ -152,6 +176,7 @@ function update(delta) {
     player.vy += GRAVITY * delta;
     player.y += player.vy * delta;
     player.grounded = false;
+    const wasFalling = player.vy > 0;
 
     for (const platform of platforms) {
         const crossesPlatform = player.x + player.width > platform.x && player.x < platform.x + platform.width;
@@ -161,6 +186,23 @@ function update(delta) {
             player.y = platform.y - player.height;
             player.vy = 0;
             player.grounded = true;
+        }
+    }
+
+    for (const enemy of enemies) {
+        if (!enemy.alive || !intersects(player, enemy)) continue;
+        if (wasFalling && previousBottom <= enemy.y + 8) {
+            enemy.alive = false;
+            player.y = enemy.y - player.height;
+            player.vy = -JUMP_SPEED * 0.62;
+            player.grounded = false;
+            statusText.textContent = "ドローンを撃退！その調子！";
+        } else {
+            const playerIsLeft = player.x + player.width / 2 < enemy.x + enemy.width / 2;
+            player.x = playerIsLeft ? enemy.x - player.width : enemy.x + enemy.width;
+            player.x = Math.max(0, Math.min(WORLD_WIDTH - player.width, player.x));
+            player.vy = -JUMP_SPEED * 0.42;
+            player.grounded = false;
         }
     }
 
@@ -277,6 +319,53 @@ function drawHazard(hazard) {
         context.lineTo(right, hazard.y + hazard.height);
     }
     context.fill();
+}
+
+function drawEnemy(enemy) {
+    if (!enemy.alive) return;
+    const x = enemy.x - cameraX;
+    if (x + enemy.width < -10 || x > WIDTH + 10) return;
+    const bob = Math.sin(elapsed * 4 + enemy.minX) * 1.5;
+    context.save();
+    context.translate(x, enemy.y + bob);
+
+    context.fillStyle = "rgba(10, 15, 32, .28)";
+    context.beginPath();
+    context.ellipse(enemy.width / 2, enemy.height + 3 - bob, 17, 4, 0, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = "#ff83cb";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(enemy.width / 2, 3);
+    context.lineTo(enemy.width / 2, -2);
+    context.stroke();
+    context.fillStyle = "#ffd6f1";
+    context.beginPath();
+    context.arc(enemy.width / 2, -3, 2.5, 0, Math.PI * 2);
+    context.fill();
+
+    context.shadowColor = "#f550bb";
+    context.shadowBlur = 8;
+    const bodyGradient = context.createLinearGradient(0, 2, 0, enemy.height);
+    bodyGradient.addColorStop(0, "#ff8bd4");
+    bodyGradient.addColorStop(1, "#a643a5");
+    context.fillStyle = bodyGradient;
+    context.beginPath();
+    context.roundRect(1, 3, enemy.width - 2, enemy.height - 3, 10);
+    context.fill();
+    context.shadowBlur = 0;
+    context.fillStyle = "#321b4b";
+    context.beginPath();
+    context.ellipse(12, 14, 3, 4, 0, 0, Math.PI * 2);
+    context.ellipse(22, 14, 3, 4, 0, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = "#fff0fb";
+    context.fillRect(11, 12, 1.5, 1.5);
+    context.fillRect(21, 12, 1.5, 1.5);
+    context.fillStyle = "#ffcf66";
+    context.fillRect(8, enemy.height - 3, 5, 3);
+    context.fillRect(21, enemy.height - 3, 5, 3);
+    context.restore();
 }
 
 function drawCoin(coin) {
@@ -397,6 +486,7 @@ function draw() {
     drawBackground();
     for (const platform of platforms) drawPlatform(platform);
     for (const hazard of hazards) drawHazard(hazard);
+    for (const enemy of enemies) drawEnemy(enemy);
     for (const coin of coins) drawCoin(coin);
     drawGoal();
     drawPlayer();
