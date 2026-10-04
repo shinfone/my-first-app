@@ -191,6 +191,7 @@ canvas {
 }
 
 .overlay-card button,
+.bgm-button,
 .reset-button {
     border: 0;
     cursor: pointer;
@@ -216,18 +217,35 @@ canvas {
     padding: 0 22px;
 }
 
+.footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
 .game-footer p {
     margin: 0;
     color: #b5bfd5;
     font-size: 12px;
 }
 
+.bgm-button,
 .reset-button {
     padding: 6px 0 6px 12px;
     background: transparent;
     color: #a99aff;
     font-size: 12px;
     font-weight: 600;
+    white-space: nowrap;
+}
+
+.bgm-button[aria-pressed="true"] {
+    color: #70f2df;
+}
+
+.bgm-button:disabled {
+    color: var(--muted);
+    cursor: not-allowed;
 }
 
 .reset-button:hover {

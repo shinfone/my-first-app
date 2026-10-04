@@ -8,6 +8,7 @@ const overlayTitle = document.querySelector("#overlay-title");
 const overlayMessage = document.querySelector("#overlay-message");
 const restartButton = document.querySelector("#restart-button");
 const resetButton = document.querySelector("#reset-button");
+const bgmButton = document.querySelector("#bgm-button");
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
@@ -69,6 +70,75 @@ let cameraX = 0;
 let elapsed = 0;
 let gameState = "playing";
 let lastTime = 0;
+let audioContext;
+let bgmTimer = null;
+let bgmEnabled = false;
+let bgmStarting = false;
+let bgmNoteIndex = 0;
+const bgmNotes = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46];
+const AudioContextClass = window.AudioContext;
+
+function updateBgmButton() {
+    bgmButton.textContent = `BGM: ${bgmEnabled ? "ON" : "OFF"}`;
+    bgmButton.setAttribute("aria-pressed", String(bgmEnabled));
+}
+
+function playBgmNote() {
+    if (!bgmEnabled || gameState !== "playing" || !audioContext) {
+        bgmTimer = null;
+        return;
+    }
+
+    const startTime = audioContext.currentTime;
+    const oscillator = audioContext.createOscillator();
+    const volume = audioContext.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.value = bgmNotes[bgmNoteIndex];
+    volume.gain.setValueAtTime(0.0001, startTime);
+    volume.gain.exponentialRampToValueAtTime(0.045, startTime + 0.025);
+    volume.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.24);
+    oscillator.connect(volume);
+    volume.connect(audioContext.destination);
+    oscillator.start(startTime);
+    oscillator.stop(startTime + 0.25);
+
+    bgmNoteIndex = (bgmNoteIndex + 1) % bgmNotes.length;
+    bgmTimer = window.setTimeout(playBgmNote, 280);
+}
+
+function startBgm() {
+    if (!bgmEnabled || gameState !== "playing" || bgmTimer !== null || bgmStarting || !AudioContextClass) return;
+    audioContext ??= new AudioContextClass();
+    bgmStarting = true;
+    audioContext.resume().then(() => {
+        bgmStarting = false;
+        if (bgmTimer === null && bgmEnabled && gameState === "playing") playBgmNote();
+    }).catch(() => {
+        bgmStarting = false;
+        bgmEnabled = false;
+        updateBgmButton();
+        statusText.textContent = "BGMを再生できませんでした。";
+    });
+}
+
+function stopBgm() {
+    if (bgmTimer !== null) window.clearTimeout(bgmTimer);
+    bgmTimer = null;
+}
+
+function enableBgm() {
+    if (!AudioContextClass) return;
+    bgmEnabled = true;
+    updateBgmButton();
+    startBgm();
+}
+
+if (!AudioContextClass) {
+    bgmButton.disabled = true;
+    bgmButton.textContent = "BGM利用不可";
+} else {
+    updateBgmButton();
+}
 
 function resetGame() {
     player = { x: 70, y: GROUND_Y - 44, width: 32, height: 44, vx: 0, vy: 0, grounded: true };
@@ -94,6 +164,7 @@ function resetGame() {
 }
 
 function setKey(event, pressed) {
+    if (event.target instanceof HTMLButtonElement) return;
     const key = event.key.toLowerCase();
     const handled = ["arrowleft", "arrowright", "arrowup", " ", "a", "d", "w"];
     if (handled.includes(key)) event.preventDefault();
@@ -102,6 +173,7 @@ function setKey(event, pressed) {
     if (key === "arrowleft" || key === "a") input.left = pressed;
     if (key === "arrowright" || key === "d") input.right = pressed;
     if (key === "arrowup" || key === " " || key === "w") input.jump = pressed;
+    if (pressed && handled.includes(key)) enableBgm();
 }
 
 window.addEventListener("keydown", (event) => setKey(event, true));
@@ -120,7 +192,10 @@ document.querySelectorAll("[data-control]").forEach((button) => {
     };
     button.addEventListener("pointerdown", (event) => {
         event.preventDefault();
-        if (gameState === "playing") input[control] = true;
+        if (gameState === "playing") {
+            input[control] = true;
+            enableBgm();
+        }
         button.setPointerCapture(event.pointerId);
     });
     button.addEventListener("pointerup", release);
@@ -128,8 +203,22 @@ document.querySelectorAll("[data-control]").forEach((button) => {
     button.addEventListener("lostpointercapture", release);
 });
 
-restartButton.addEventListener("click", resetGame);
-resetButton.addEventListener("click", resetGame);
+bgmButton.addEventListener("click", () => {
+    if (!AudioContextClass) return;
+    bgmEnabled = !bgmEnabled;
+    updateBgmButton();
+    if (bgmEnabled) startBgm();
+    else stopBgm();
+});
+
+restartButton.addEventListener("click", () => {
+    resetGame();
+    startBgm();
+});
+resetButton.addEventListener("click", () => {
+    resetGame();
+    startBgm();
+});
 
 function intersects(a, b) {
     return a.x < b.x + b.width && a.x + a.width > b.x
@@ -138,6 +227,7 @@ function intersects(a, b) {
 
 function finish(won) {
     gameState = won ? "won" : "lost";
+    stopBgm();
     overlay.hidden = false;
     if (won) {
         overlayEyebrow.textContent = "MISSION COMPLETE";
