@@ -255,8 +255,37 @@ function update(delta) {
     }
 
     const previousBottom = player.y + player.height;
+    const previousX = player.x;
     player.vx = (Number(input.right) - Number(input.left)) * RUN_SPEED;
     player.x = Math.max(0, Math.min(WORLD_WIDTH - player.width, player.x + player.vx * delta));
+
+    if (player.vx !== 0) {
+        for (const platform of platforms) {
+            if (platform.y !== GROUND_Y) continue;
+            if (player.y + player.height <= platform.y) continue;
+
+            const platformRight = platform.x + platform.width;
+            const crossedRightward = player.vx > 0
+                && previousX + player.width <= platform.x
+                && player.x + player.width > platform.x;
+            const crossedLeftward = player.vx < 0
+                && previousX >= platformRight
+                && player.x < platformRight;
+            const wasEmbedded = player.y >= platform.y
+                && previousX < platformRight
+                && previousX + player.width > platform.x;
+            const approachedFromLeft = previousX + player.width / 2
+                < platform.x + platform.width / 2;
+            const movingDeeper = wasEmbedded
+                && ((approachedFromLeft && player.vx > 0) || (!approachedFromLeft && player.vx < 0));
+
+            if (crossedRightward || (movingDeeper && approachedFromLeft)) {
+                player.x = platform.x - player.width;
+            } else if (crossedLeftward || (movingDeeper && !approachedFromLeft)) {
+                player.x = platformRight;
+            }
+        }
+    }
 
     if (input.jump && player.grounded) {
         player.vy = -JUMP_SPEED;
@@ -415,14 +444,10 @@ function drawEnemy(enemy) {
     if (!enemy.alive) return;
     const x = enemy.x - cameraX;
     if (x + enemy.width < -10 || x > WIDTH + 10) return;
-    const bob = Math.sin(elapsed * 4 + enemy.minX) * 1.5;
+    const bob = (Math.sin(elapsed * 4 + enemy.minX) - 1) * 1.5;
     context.save();
     context.translate(x, enemy.y + bob);
 
-    context.fillStyle = "rgba(10, 15, 32, .28)";
-    context.beginPath();
-    context.ellipse(enemy.width / 2, enemy.height + 3 - bob, 17, 4, 0, 0, Math.PI * 2);
-    context.fill();
     context.strokeStyle = "#ff83cb";
     context.lineWidth = 2;
     context.beginPath();
@@ -500,7 +525,7 @@ function drawPlayer() {
     const x = player.x - cameraX;
     const y = player.y;
     const moving = Math.abs(player.vx) > 0;
-    const bob = player.grounded && moving ? Math.sin(elapsed * 19) * 2 : 0;
+    const bob = player.grounded && moving ? (Math.sin(elapsed * 19) - 1) * 2 : 0;
     context.save();
     context.translate(x, y + bob);
 
