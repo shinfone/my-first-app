@@ -12,6 +12,7 @@ const bgmButton = document.querySelector("#bgm-button");
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
+const PLATFORM_BOTTOM = HEIGHT + 20;
 const WORLD_WIDTH = 3000;
 const GROUND_Y = 470;
 const GRAVITY = 1800;
@@ -33,10 +34,10 @@ const platforms = [
 ];
 
 const hazards = [
-    { x: 505, y: GROUND_Y - 28, width: 48, height: 28 },
-    { x: 1015, y: GROUND_Y - 28, width: 50, height: 28 },
-    { x: 1745, y: GROUND_Y - 28, width: 52, height: 28 },
-    { x: 2460, y: GROUND_Y - 28, width: 50, height: 28 },
+    { x: 505, y: GROUND_Y - 29, width: 48, height: 28 },
+    { x: 1015, y: GROUND_Y - 29, width: 50, height: 28 },
+    { x: 1745, y: GROUND_Y - 29, width: 52, height: 28 },
+    { x: 2460, y: GROUND_Y - 29, width: 50, height: 28 },
 ];
 
 const coinPositions = [
@@ -51,8 +52,8 @@ const coinPositions = [
 ];
 
 const enemyPositions = [
-    { x: 370, minX: 345, maxX: 435 },
-    { x: 805, minX: 790, maxX: 925 },
+    { x: 435, minX: 415, maxX: 505 },
+    { x: 780, minX: 760, maxX: 850 },
 ];
 
 const stars = Array.from({ length: 65 }, (_, index) => ({
@@ -145,7 +146,7 @@ function resetGame() {
     coins = coinPositions.map((coin) => ({ ...coin, collected: false }));
     enemies = enemyPositions.map((enemy) => ({
         ...enemy,
-        y: GROUND_Y - 26,
+        y: GROUND_Y - 27,
         width: 34,
         height: 26,
         speed: 38,
@@ -225,6 +226,28 @@ function intersects(a, b) {
         && a.y < b.y + b.height && a.y + a.height > b.y;
 }
 
+function resolvePlatformWallX(entity, previousX, nextX) {
+    let resolvedX = nextX;
+    for (const platform of platforms) {
+        if (entity.y + entity.height <= platform.y || entity.y >= PLATFORM_BOTTOM) continue;
+        const platformRight = platform.x + platform.width;
+        if (resolvedX >= platformRight || resolvedX + entity.width <= platform.x) continue;
+
+        if (nextX > previousX) {
+            resolvedX = platform.x - entity.width;
+        } else if (nextX < previousX) {
+            resolvedX = platformRight;
+        } else {
+            const distanceFromLeft = Math.abs(previousX + entity.width - platform.x);
+            const distanceFromRight = Math.abs(platformRight - previousX);
+            resolvedX = distanceFromLeft <= distanceFromRight
+                ? platform.x - entity.width
+                : platformRight;
+        }
+    }
+    return Math.max(0, Math.min(WORLD_WIDTH - entity.width, resolvedX));
+}
+
 function finish(won) {
     gameState = won ? "won" : "lost";
     stopBgm();
@@ -247,45 +270,20 @@ function update(delta) {
 
     for (const enemy of enemies) {
         if (!enemy.alive) continue;
-        enemy.x += enemy.speed * enemy.direction * delta;
-        if (enemy.x <= enemy.minX || enemy.x + enemy.width >= enemy.maxX) {
+        const previousEnemyX = enemy.x;
+        const nextEnemyX = enemy.x + enemy.speed * enemy.direction * delta;
+        const boundedEnemyX = Math.max(enemy.minX, Math.min(enemy.maxX - enemy.width, nextEnemyX));
+        enemy.x = resolvePlatformWallX(enemy, previousEnemyX, boundedEnemyX);
+        if (enemy.x !== boundedEnemyX || boundedEnemyX !== nextEnemyX) {
             enemy.direction *= -1;
-            enemy.x = Math.max(enemy.minX, Math.min(enemy.maxX - enemy.width, enemy.x));
         }
     }
 
     const previousBottom = player.y + player.height;
     const previousX = player.x;
     player.vx = (Number(input.right) - Number(input.left)) * RUN_SPEED;
-    player.x = Math.max(0, Math.min(WORLD_WIDTH - player.width, player.x + player.vx * delta));
-
-    if (player.vx !== 0) {
-        for (const platform of platforms) {
-            if (platform.y !== GROUND_Y) continue;
-            if (player.y + player.height <= platform.y) continue;
-
-            const platformRight = platform.x + platform.width;
-            const crossedRightward = player.vx > 0
-                && previousX + player.width <= platform.x
-                && player.x + player.width > platform.x;
-            const crossedLeftward = player.vx < 0
-                && previousX >= platformRight
-                && player.x < platformRight;
-            const wasEmbedded = player.y >= platform.y
-                && previousX < platformRight
-                && previousX + player.width > platform.x;
-            const approachedFromLeft = previousX + player.width / 2
-                < platform.x + platform.width / 2;
-            const movingDeeper = wasEmbedded
-                && ((approachedFromLeft && player.vx > 0) || (!approachedFromLeft && player.vx < 0));
-
-            if (crossedRightward || (movingDeeper && approachedFromLeft)) {
-                player.x = platform.x - player.width;
-            } else if (crossedLeftward || (movingDeeper && !approachedFromLeft)) {
-                player.x = platformRight;
-            }
-        }
-    }
+    const nextX = Math.max(0, Math.min(WORLD_WIDTH - player.width, player.x + player.vx * delta));
+    player.x = resolvePlatformWallX(player, previousX, nextX);
 
     if (input.jump && player.grounded) {
         player.vy = -JUMP_SPEED;
@@ -324,6 +322,7 @@ function update(delta) {
             player.grounded = false;
         }
     }
+    player.x = resolvePlatformWallX(player, previousX, player.x);
 
     if (player.y > HEIGHT + 90) {
         finish(false);
@@ -416,7 +415,7 @@ function drawPlatform(platform) {
     if (x + platform.width < -20 || x > WIDTH + 20) return;
 
     context.fillStyle = "#263957";
-    context.fillRect(x, platform.y, platform.width, HEIGHT - platform.y + 20);
+    context.fillRect(x, platform.y, platform.width, PLATFORM_BOTTOM - platform.y);
     context.fillStyle = "#83d7c2";
     context.fillRect(x, platform.y, platform.width, 7);
     context.fillStyle = "rgba(179, 247, 222, .35)";
@@ -459,8 +458,6 @@ function drawEnemy(enemy) {
     context.arc(enemy.width / 2, -3, 2.5, 0, Math.PI * 2);
     context.fill();
 
-    context.shadowColor = "#f550bb";
-    context.shadowBlur = 8;
     const bodyGradient = context.createLinearGradient(0, 2, 0, enemy.height);
     bodyGradient.addColorStop(0, "#ff8bd4");
     bodyGradient.addColorStop(1, "#a643a5");
@@ -468,7 +465,6 @@ function drawEnemy(enemy) {
     context.beginPath();
     context.roundRect(1, 3, enemy.width - 2, enemy.height - 3, 10);
     context.fill();
-    context.shadowBlur = 0;
     context.fillStyle = "#321b4b";
     context.beginPath();
     context.ellipse(12, 14, 3, 4, 0, 0, Math.PI * 2);
@@ -528,11 +524,6 @@ function drawPlayer() {
     const bob = player.grounded && moving ? (Math.sin(elapsed * 19) - 1) * 2 : 0;
     context.save();
     context.translate(x, y + bob);
-
-    context.fillStyle = "rgba(10, 15, 32, .2)";
-    context.beginPath();
-    context.ellipse(player.width / 2, player.height + 3 - bob, 17, 4, 0, 0, Math.PI * 2);
-    context.fill();
 
     const facing = input.left ? -1 : 1;
     context.strokeStyle = "#74f6e0";
