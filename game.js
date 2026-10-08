@@ -63,6 +63,13 @@ const stars = Array.from({ length: 65 }, (_, index) => ({
     phase: index * 0.7,
 }));
 
+const rainDrops = Array.from({ length: 72 }, (_, index) => ({
+    x: (index * 137 + 29) % WIDTH,
+    y: (index * 83 + 17) % HEIGHT,
+    length: 8 + (index % 5) * 3,
+    speed: 150 + (index % 7) * 24,
+}));
+
 const input = { left: false, right: false, jump: false };
 let player;
 let coins;
@@ -376,6 +383,7 @@ function drawBackground() {
     drawSkyline(0.12, 150, 385, 95, "#202d55", "rgba(101, 135, 211, .2)");
     drawSkyline(0.28, 120, 420, 155, "#172246", "rgba(57, 216, 225, .45)");
     drawSkyline(0.48, 96, 455, 205, "#111a38", "rgba(201, 83, 226, .42)");
+    drawRain();
 }
 
 function drawSkyline(parallax, segmentWidth, baseY, maxHeight, buildingColor, windowColor) {
@@ -407,26 +415,66 @@ function drawSkyline(parallax, segmentWidth, baseY, maxHeight, buildingColor, wi
         context.globalAlpha = 1;
         context.fillStyle = "rgba(58, 224, 230, .55)";
         context.fillRect(x + width * 0.48, top + 4, Math.min(18, width * 0.22), 2);
+        if (seed % 4 === 0 && width > 75) {
+            const signX = x + width * 0.58;
+            const signY = top + 24 + seed % 28;
+            context.shadowColor = seed % 8 === 0 ? "#ff4fc8" : "#35f4ee";
+            context.shadowBlur = 9;
+            context.strokeStyle = seed % 8 === 0 ? "#ff4fc8" : "#35f4ee";
+            context.lineWidth = 1;
+            context.strokeRect(signX, signY, 22, 13);
+            context.shadowBlur = 0;
+            context.fillStyle = seed % 8 === 0 ? "#ff9bdf" : "#a4fffb";
+            context.font = "7px sans-serif";
+            context.fillText("NEON", signX + 2, signY + 9);
+        }
     }
+}
+
+function drawRain() {
+    context.save();
+    context.strokeStyle = "rgba(139, 222, 255, .28)";
+    context.lineWidth = 1;
+    context.beginPath();
+    for (const drop of rainDrops) {
+        const x = ((drop.x - elapsed * drop.speed * 0.22) % (WIDTH + 24) + WIDTH + 24) % (WIDTH + 24) - 12;
+        const y = (drop.y + elapsed * drop.speed) % (HEIGHT + 30) - 15;
+        context.moveTo(x, y);
+        context.lineTo(x - 3, y + drop.length);
+    }
+    context.stroke();
+    context.restore();
 }
 
 function drawPlatform(platform) {
     const x = platform.x - cameraX;
     if (x + platform.width < -20 || x > WIDTH + 20) return;
 
-    context.fillStyle = "#263957";
+    context.fillStyle = "#101b32";
     context.fillRect(x, platform.y, platform.width, PLATFORM_BOTTOM - platform.y);
-    context.fillStyle = "#83d7c2";
-    context.fillRect(x, platform.y, platform.width, 7);
-    context.fillStyle = "rgba(179, 247, 222, .35)";
-    context.fillRect(x + 8, platform.y + 11, Math.max(0, platform.width - 16), 2);
+    context.fillStyle = "rgba(35, 67, 94, .8)";
+    for (let panelX = x + 12; panelX < x + platform.width - 8; panelX += 36) {
+        context.fillRect(panelX, platform.y + 16, 25, PLATFORM_BOTTOM - platform.y - 16);
+        context.fillStyle = "rgba(51, 244, 238, .12)";
+        context.fillRect(panelX + 3, platform.y + 21, 1, PLATFORM_BOTTOM - platform.y - 27);
+        context.fillStyle = "rgba(35, 67, 94, .8)";
+    }
+    context.shadowColor = "#35f4ee";
+    context.shadowBlur = 10;
+    context.fillStyle = "#35f4ee";
+    context.fillRect(x, platform.y, platform.width, 3);
+    context.shadowBlur = 0;
+    context.fillStyle = "rgba(255, 79, 200, .75)";
+    context.fillRect(x, platform.y + 5, platform.width, 1);
 }
 
 function drawHazard(hazard) {
     const x = hazard.x - cameraX;
     if (x + hazard.width < -10 || x > WIDTH + 10) return;
     const teeth = Math.max(1, Math.floor(hazard.width / 16));
-    context.fillStyle = "#ff718c";
+    context.shadowColor = "#ff315d";
+    context.shadowBlur = 13;
+    context.fillStyle = "#ff456d";
     context.beginPath();
     context.moveTo(x, hazard.y + hazard.height);
     for (let index = 0; index < teeth; index += 1) {
@@ -437,6 +485,7 @@ function drawHazard(hazard) {
         context.lineTo(right, hazard.y + hazard.height);
     }
     context.fill();
+    context.shadowBlur = 0;
 }
 
 function drawEnemy(enemy) {
@@ -447,7 +496,9 @@ function drawEnemy(enemy) {
     context.save();
     context.translate(x, enemy.y + bob);
 
-    context.strokeStyle = "#ff83cb";
+    context.shadowColor = "#ff4fc8";
+    context.shadowBlur = 12;
+    context.strokeStyle = "#ff83dc";
     context.lineWidth = 2;
     context.beginPath();
     context.moveTo(enemy.width / 2, 3);
@@ -457,6 +508,7 @@ function drawEnemy(enemy) {
     context.beginPath();
     context.arc(enemy.width / 2, -3, 2.5, 0, Math.PI * 2);
     context.fill();
+    context.shadowBlur = 0;
 
     const bodyGradient = context.createLinearGradient(0, 2, 0, enemy.height);
     bodyGradient.addColorStop(0, "#ff8bd4");
@@ -488,12 +540,15 @@ function drawCoin(coin) {
     context.translate(x, coin.y);
     context.scale(pulse, 1);
     context.fillStyle = "#ffd36f";
+    context.shadowColor = "#ffd36f";
+    context.shadowBlur = 14;
     context.beginPath();
     context.arc(0, 0, 10, 0, Math.PI * 2);
     context.fill();
     context.strokeStyle = "#fff0ad";
     context.lineWidth = 2;
     context.stroke();
+    context.shadowBlur = 0;
     context.fillStyle = "#b88636";
     context.fillRect(-1, -5, 2, 10);
     context.restore();
@@ -502,19 +557,25 @@ function drawCoin(coin) {
 function drawGoal() {
     const x = WORLD_WIDTH - 112 - cameraX;
     if (x < -50 || x > WIDTH + 50) return;
-    context.fillStyle = "#d9e1f7";
+    context.shadowColor = "#35f4ee";
+    context.shadowBlur = 12;
+    context.fillStyle = "#a9fffb";
     context.fillRect(x, GROUND_Y - 118, 5, 118);
-    context.fillStyle = "#a99aff";
+    context.shadowBlur = 0;
+    context.fillStyle = "#ff4fc8";
     context.beginPath();
     context.moveTo(x + 5, GROUND_Y - 116);
     context.lineTo(x + 53, GROUND_Y - 99);
     context.lineTo(x + 5, GROUND_Y - 82);
     context.closePath();
     context.fill();
+    context.shadowColor = "#ff4fc8";
+    context.shadowBlur = 12;
     context.fillStyle = "#f3f4ff";
     context.beginPath();
     context.arc(x + 2.5, GROUND_Y - 121, 6, 0, Math.PI * 2);
     context.fill();
+    context.shadowBlur = 0;
 }
 
 function drawPlayer() {
@@ -534,8 +595,8 @@ function drawPlayer() {
     context.moveTo(22, 7);
     context.quadraticCurveTo(25, 1, 23, -3);
     context.stroke();
-    context.shadowColor = "#63ffe6";
-    context.shadowBlur = 9;
+    context.shadowColor = "#35f4ee";
+    context.shadowBlur = 13;
     context.fillStyle = "#c7fff2";
     context.beginPath();
     context.arc(10, -3, 2.5, 0, Math.PI * 2);
@@ -570,13 +631,13 @@ function drawPlayer() {
     context.stroke();
 
     const suitGradient = context.createLinearGradient(0, 25, 0, 44);
-    suitGradient.addColorStop(0, "#9b7cff");
-    suitGradient.addColorStop(1, "#5742bd");
+    suitGradient.addColorStop(0, "#ff4fc8");
+    suitGradient.addColorStop(1, "#8b2d9b");
     context.fillStyle = suitGradient;
     context.beginPath();
     context.roundRect(1, 25, 30, 18, 7);
     context.fill();
-    context.fillStyle = "#c9baff";
+    context.fillStyle = "#ffb0eb";
     context.fillRect(7, 39, 7, 5);
     context.fillRect(20, 39, 7, 5);
     context.fillStyle = "#70f2df";

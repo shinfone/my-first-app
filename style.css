@@ -3,13 +3,14 @@
 :root {
     color-scheme: dark;
     font-family: "DM Sans", "Noto Sans JP", sans-serif;
-    color: #f6f7ff;
-    background: #101a31;
+    color: #eafaff;
+    background: #060912;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
-    --muted: #9aa6c2;
-    --accent: #8c78ff;
+    --muted: #8597ae;
+    --accent: #35f4ee;
+    --neon-pink: #ff4fc8;
 }
 
 * {
@@ -21,8 +22,12 @@ body {
     min-height: 100vh;
     margin: 0;
     background:
-        radial-gradient(ellipse at 50% 0%, rgba(74, 87, 160, .23), transparent 52%),
-        #101a31;
+        radial-gradient(ellipse at 18% 5%, rgba(255, 79, 200, .12), transparent 38%),
+        radial-gradient(ellipse at 85% 25%, rgba(53, 244, 238, .11), transparent 38%),
+        linear-gradient(rgba(53, 244, 238, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(53, 244, 238, .025) 1px, transparent 1px),
+        #060912;
+    background-size: auto, auto, 42px 42px, 42px 42px, auto;
 }
 
 button {
@@ -54,11 +59,12 @@ button {
 
 .brand {
     gap: 10px;
-    color: #f8f7ff;
+    color: #efffff;
     font-size: 13px;
     font-weight: 800;
     letter-spacing: .13em;
     text-decoration: none;
+    text-shadow: 0 0 16px rgba(53, 244, 238, .38);
 }
 
 .brand-mark {
@@ -66,10 +72,12 @@ button {
     width: 30px;
     height: 30px;
     place-items: center;
-    border: 1px solid rgba(169, 155, 255, .35);
-    border-radius: 10px;
-    color: #b9aaff;
+    border: 1px solid rgba(53, 244, 238, .5);
+    border-radius: 8px 2px 8px 2px;
+    background: rgba(53, 244, 238, .06);
+    color: var(--accent);
     font-size: 17px;
+    box-shadow: 0 0 17px rgba(53, 244, 238, .12), inset 0 0 12px rgba(53, 244, 238, .08);
 }
 
 .topbar-note,
@@ -86,10 +94,10 @@ button {
 .game-card,
 .how-to-play {
     overflow: hidden;
-    border: 1px solid rgba(151, 167, 215, .15);
-    border-radius: 18px;
-    background: #18243e;
-    box-shadow: 0 24px 70px rgba(4, 9, 25, .24);
+    border: 1px solid rgba(53, 244, 238, .2);
+    border-radius: 5px 16px 5px 16px;
+    background: linear-gradient(145deg, rgba(15, 24, 42, .98), rgba(8, 13, 25, .98));
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .48), 0 0 32px rgba(53, 244, 238, .07);
 }
 
 .game-heading {
@@ -100,10 +108,11 @@ button {
 
 .eyebrow {
     margin: 0 0 6px;
-    color: #a99aff;
+    color: var(--neon-pink);
     font-size: 10px;
     font-weight: 800;
     letter-spacing: .16em;
+    text-shadow: 0 0 12px rgba(255, 79, 200, .42);
 }
 
 .game-heading h1,
@@ -116,6 +125,7 @@ button {
     font-size: 21px;
     font-weight: 700;
     letter-spacing: .015em;
+    text-shadow: 0 0 18px rgba(53, 244, 238, .15);
 }
 
 .score {
@@ -123,21 +133,23 @@ button {
     align-items: center;
     gap: 7px;
     padding: 9px 14px;
-    border: 1px solid rgba(242, 197, 94, .16);
-    border-radius: 11px;
-    background: rgba(244, 190, 74, .08);
-    color: #ffd36f;
+    border: 1px solid rgba(255, 79, 200, .4);
+    border-radius: 3px 10px 3px 10px;
+    background: rgba(255, 79, 200, .08);
+    color: #ff9ce1;
     font-size: 16px;
     font-weight: 800;
+    box-shadow: 0 0 18px rgba(255, 79, 200, .1), inset 0 0 12px rgba(255, 79, 200, .05);
 }
 
 .coin-icon {
     font-size: 13px;
-    text-shadow: 0 0 10px rgba(255, 203, 81, .55);
+    color: #35f4ee;
+    text-shadow: 0 0 10px rgba(53, 244, 238, .8);
 }
 
 .score-total {
-    color: #aab3ca;
+    color: #a7b8cb;
     font-size: 12px;
     font-weight: 500;
 }
@@ -145,7 +157,8 @@ button {
 .canvas-wrap {
     position: relative;
     overflow: hidden;
-    background: #18294a;
+    background: #080d1c;
+    box-shadow: inset 0 1px rgba(53, 244, 238, .28), inset 0 -1px rgba(255, 79, 200, .22);
 }
 
 canvas {
@@ -161,8 +174,8 @@ canvas {
     inset: 0;
     display: grid;
     place-items: center;
-    background: rgba(8, 14, 30, .58);
-    backdrop-filter: blur(5px);
+    background: rgba(3, 6, 14, .7);
+    backdrop-filter: blur(6px);
 }
 
 .game-overlay[hidden] {
@@ -172,11 +185,11 @@ canvas {
 .overlay-card {
     width: min(330px, calc(100% - 32px));
     padding: 27px 24px;
-    border: 1px solid rgba(178, 168, 255, .28);
-    border-radius: 16px;
-    background: #202b49;
+    border: 1px solid rgba(53, 244, 238, .48);
+    border-radius: 4px 14px 4px 14px;
+    background: linear-gradient(145deg, rgba(15, 25, 43, .98), rgba(9, 13, 27, .98));
     text-align: center;
-    box-shadow: 0 18px 55px rgba(5, 8, 20, .38);
+    box-shadow: 0 18px 55px rgba(0, 0, 0, .55), 0 0 28px rgba(53, 244, 238, .14);
 }
 
 .overlay-card h2 {
@@ -186,7 +199,7 @@ canvas {
 
 .overlay-card > p:not(.eyebrow) {
     margin: 0 0 20px;
-    color: #b5bfd5;
+    color: #a7b8cb;
     font-size: 13px;
 }
 
@@ -199,12 +212,13 @@ canvas {
 
 .overlay-card button {
     padding: 11px 18px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #a194ff, #7865ec);
+    border: 1px solid rgba(255, 255, 255, .24);
+    border-radius: 3px 9px 3px 9px;
+    background: linear-gradient(110deg, #ff4fc8, #b52bba 48%, #35cbd2);
     color: #fff;
     font-size: 13px;
     font-weight: 700;
-    box-shadow: 0 7px 20px rgba(122, 103, 240, .25);
+    box-shadow: 0 0 20px rgba(255, 79, 200, .25);
 }
 
 .overlay-card button:hover {
@@ -225,7 +239,7 @@ canvas {
 
 .game-footer p {
     margin: 0;
-    color: #b5bfd5;
+    color: #a7b8cb;
     font-size: 12px;
 }
 
@@ -233,14 +247,15 @@ canvas {
 .reset-button {
     padding: 6px 0 6px 12px;
     background: transparent;
-    color: #a99aff;
+    color: #ff8bdb;
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
 }
 
 .bgm-button[aria-pressed="true"] {
-    color: #70f2df;
+    color: #35f4ee;
+    text-shadow: 0 0 10px rgba(53, 244, 238, .5);
 }
 
 .bgm-button:disabled {
@@ -249,7 +264,7 @@ canvas {
 }
 
 .reset-button:hover {
-    color: #d0c8ff;
+    color: #35f4ee;
 }
 
 .how-to-play {
@@ -259,7 +274,7 @@ canvas {
     gap: 24px;
     margin-top: 16px;
     padding: 19px 25px;
-    background: rgba(24, 36, 62, .72);
+    background: linear-gradient(110deg, rgba(13, 22, 39, .92), rgba(11, 15, 29, .86));
 }
 
 .section-title {
@@ -272,10 +287,11 @@ canvas {
     width: 37px;
     height: 37px;
     place-items: center;
-    border-radius: 11px;
-    background: rgba(141, 120, 255, .13);
-    color: #b6aaff;
+    border-radius: 4px 10px 4px 10px;
+    background: rgba(53, 244, 238, .1);
+    color: var(--accent);
     font-size: 18px;
+    box-shadow: inset 0 0 14px rgba(53, 244, 238, .08), 0 0 14px rgba(53, 244, 238, .08);
 }
 
 .section-title h2 {
@@ -293,7 +309,7 @@ canvas {
 
 .control-item {
     gap: 9px;
-    color: #c1c9dc;
+    color: #bdcddb;
     font-size: 11px;
     white-space: nowrap;
 }
@@ -309,13 +325,14 @@ kbd,
     height: 25px;
     padding: 0 5px;
     place-items: center;
-    border: 1px solid rgba(177, 190, 225, .19);
-    border-radius: 6px;
-    background: #253452;
-    color: #e2e6f3;
+    border: 1px solid rgba(53, 244, 238, .24);
+    border-radius: 3px 6px 3px 6px;
+    background: #101d30;
+    color: #c8fffc;
     font-family: inherit;
     font-size: 10px;
     font-weight: 600;
+    box-shadow: inset 0 -2px rgba(53, 244, 238, .08);
 }
 
 .touch-key {
@@ -336,7 +353,8 @@ kbd,
 
 .page-footer span {
     margin-left: 4px;
-    color: #a99aff;
+    color: var(--neon-pink);
+    text-shadow: 0 0 10px rgba(255, 79, 200, .65);
 }
 
 @media (max-width: 700px) {
@@ -356,7 +374,7 @@ kbd,
 
     .game-card,
     .how-to-play {
-        border-radius: 14px;
+        border-radius: 4px 12px 4px 12px;
     }
 
     .game-heading {
@@ -396,18 +414,19 @@ kbd,
     .touch-controls button {
         width: 54px;
         height: 46px;
-        border: 1px solid rgba(169, 155, 255, .26);
-        border-radius: 12px;
-        background: #202d4b;
-        color: #dedaff;
+        border: 1px solid rgba(53, 244, 238, .32);
+        border-radius: 4px 10px 4px 10px;
+        background: #101d30;
+        color: #bafffb;
         font-size: 17px;
         touch-action: none;
         user-select: none;
+        box-shadow: 0 0 14px rgba(53, 244, 238, .1), inset 0 0 12px rgba(53, 244, 238, .05);
     }
 
     .touch-controls button[data-control="jump"] {
         margin-left: 22px;
-        background: #6858ce;
+        background: linear-gradient(135deg, #ff4fc8, #b52bba);
         color: white;
     }
 }
