@@ -1,16 +1,16 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&family=Press+Start+2P&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap");
 
 :root {
     color-scheme: dark;
-    font-family: "Press Start 2P", "Noto Sans JP", sans-serif;
-    color: #f8f2d8;
-    background: #11152b;
+    font-family: "DM Sans", "Noto Sans JP", sans-serif;
+    color: #eafaff;
+    background: #060912;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
-    --muted: #a6a9bd;
-    --accent: #55e6c1;
-    --line: #414768;
-    --panel: #1b203b;
+    -webkit-font-smoothing: antialiased;
+    --muted: #8597ae;
+    --accent: #35f4ee;
+    --neon-pink: #ff4fc8;
 }
 
 * {
@@ -21,11 +21,13 @@ body {
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
-    background-color: #11152b;
-    background-image:
-        linear-gradient(rgba(93, 111, 165, .08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(93, 111, 165, .08) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background:
+        radial-gradient(ellipse at 18% 5%, rgba(255, 79, 200, .12), transparent 38%),
+        radial-gradient(ellipse at 85% 25%, rgba(53, 244, 238, .11), transparent 38%),
+        linear-gradient(rgba(53, 244, 238, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(53, 244, 238, .025) 1px, transparent 1px),
+        #060912;
+    background-size: auto, auto, 42px 42px, 42px 42px, auto;
 }
 
 button {
@@ -52,15 +54,17 @@ button {
 
 .topbar {
     justify-content: space-between;
-    margin-bottom: 18px;
+    margin-bottom: 24px;
 }
 
 .brand {
     gap: 10px;
-    color: #f8f2d8;
-    font-size: 11px;
-    letter-spacing: .08em;
+    color: #efffff;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .13em;
     text-decoration: none;
+    text-shadow: 0 0 16px rgba(53, 244, 238, .38);
 }
 
 .brand-mark {
@@ -68,16 +72,18 @@ button {
     width: 30px;
     height: 30px;
     place-items: center;
-    border: 2px solid #f5c858;
-    color: #f5c858;
-    font-size: 15px;
+    border: 1px solid rgba(53, 244, 238, .5);
+    border-radius: 8px 2px 8px 2px;
+    background: rgba(53, 244, 238, .06);
+    color: var(--accent);
+    font-size: 17px;
+    box-shadow: 0 0 17px rgba(53, 244, 238, .12), inset 0 0 12px rgba(53, 244, 238, .08);
 }
 
 .topbar-note,
 .section-title p,
 .page-footer {
     color: var(--muted);
-    font-family: "Noto Sans JP", sans-serif;
     font-size: 12px;
 }
 
@@ -88,9 +94,10 @@ button {
 .game-card,
 .how-to-play {
     overflow: hidden;
-    border: 2px solid var(--line);
-    background: var(--panel);
-    box-shadow: 5px 5px 0 #080b18;
+    border: 1px solid rgba(53, 244, 238, .2);
+    border-radius: 5px 16px 5px 16px;
+    background: linear-gradient(145deg, rgba(15, 24, 42, .98), rgba(8, 13, 25, .98));
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .48), 0 0 32px rgba(53, 244, 238, .07);
 }
 
 .game-heading {
@@ -100,10 +107,12 @@ button {
 }
 
 .eyebrow {
-    margin: 0 0 9px;
-    color: #f5c858;
-    font-size: 8px;
-    letter-spacing: .08em;
+    margin: 0 0 6px;
+    color: var(--neon-pink);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-shadow: 0 0 12px rgba(255, 79, 200, .42);
 }
 
 .game-heading h1,
@@ -113,37 +122,43 @@ button {
 }
 
 .game-heading h1 {
-    font-family: "Noto Sans JP", sans-serif;
     font-size: 21px;
-    font-weight: 800;
+    font-weight: 700;
+    letter-spacing: .015em;
+    text-shadow: 0 0 18px rgba(53, 244, 238, .15);
 }
 
 .score {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    border: 2px solid #9b793b;
-    background: #302a35;
-    color: #f5c858;
-    font-size: 13px;
+    gap: 7px;
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 79, 200, .4);
+    border-radius: 3px 10px 3px 10px;
+    background: rgba(255, 79, 200, .08);
+    color: #ff9ce1;
+    font-size: 16px;
+    font-weight: 800;
+    box-shadow: 0 0 18px rgba(255, 79, 200, .1), inset 0 0 12px rgba(255, 79, 200, .05);
 }
 
 .coin-icon {
-    font-size: 12px;
+    font-size: 13px;
+    color: #35f4ee;
+    text-shadow: 0 0 10px rgba(53, 244, 238, .8);
 }
 
 .score-total {
-    color: #c0b8a5;
-    font-size: 9px;
+    color: #a7b8cb;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 .canvas-wrap {
     position: relative;
     overflow: hidden;
-    border-top: 2px solid var(--line);
-    border-bottom: 2px solid var(--line);
-    background: #11152b;
+    background: #080d1c;
+    box-shadow: inset 0 1px rgba(53, 244, 238, .28), inset 0 -1px rgba(255, 79, 200, .22);
 }
 
 canvas {
@@ -151,7 +166,6 @@ canvas {
     width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
-    image-rendering: pixelated;
     touch-action: none;
 }
 
@@ -160,7 +174,8 @@ canvas {
     inset: 0;
     display: grid;
     place-items: center;
-    background: rgba(8, 11, 24, .76);
+    background: rgba(3, 6, 14, .7);
+    backdrop-filter: blur(6px);
 }
 
 .game-overlay[hidden] {
@@ -168,24 +183,23 @@ canvas {
 }
 
 .overlay-card {
-    width: min(360px, calc(100% - 32px));
+    width: min(330px, calc(100% - 32px));
     padding: 27px 24px;
-    border: 3px solid #f5c858;
-    background: #1b203b;
+    border: 1px solid rgba(53, 244, 238, .48);
+    border-radius: 4px 14px 4px 14px;
+    background: linear-gradient(145deg, rgba(15, 25, 43, .98), rgba(9, 13, 27, .98));
     text-align: center;
-    box-shadow: 6px 6px 0 #080b18;
+    box-shadow: 0 18px 55px rgba(0, 0, 0, .55), 0 0 28px rgba(53, 244, 238, .14);
 }
 
 .overlay-card h2 {
-    margin: 8px 0;
-    color: #55e6c1;
-    font-size: 18px;
+    margin: 4px 0 8px;
+    font-size: 27px;
 }
 
 .overlay-card > p:not(.eyebrow) {
     margin: 0 0 20px;
-    color: #c5c6d1;
-    font-family: "Noto Sans JP", sans-serif;
+    color: #a7b8cb;
     font-size: 13px;
 }
 
@@ -197,16 +211,18 @@ canvas {
 }
 
 .overlay-card button {
-    padding: 12px 14px;
-    border: 2px solid #55e6c1;
-    background: #237c70;
-    color: #fff8dc;
-    font-size: 9px;
+    padding: 11px 18px;
+    border: 1px solid rgba(255, 255, 255, .24);
+    border-radius: 3px 9px 3px 9px;
+    background: linear-gradient(110deg, #ff4fc8, #b52bba 48%, #35cbd2);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 0 20px rgba(255, 79, 200, .25);
 }
 
-.overlay-card button:hover,
-.touch-controls button:hover {
-    filter: brightness(1.2);
+.overlay-card button:hover {
+    filter: brightness(1.08);
 }
 
 .game-footer {
@@ -223,8 +239,7 @@ canvas {
 
 .game-footer p {
     margin: 0;
-    color: #c5c6d1;
-    font-family: "Noto Sans JP", sans-serif;
+    color: #a7b8cb;
     font-size: 12px;
 }
 
@@ -232,13 +247,15 @@ canvas {
 .reset-button {
     padding: 6px 0 6px 12px;
     background: transparent;
-    color: #55e6c1;
-    font-size: 8px;
+    color: #ff8bdb;
+    font-size: 12px;
+    font-weight: 600;
     white-space: nowrap;
 }
 
 .bgm-button[aria-pressed="true"] {
-    color: #f5c858;
+    color: #35f4ee;
+    text-shadow: 0 0 10px rgba(53, 244, 238, .5);
 }
 
 .bgm-button:disabled {
@@ -247,7 +264,7 @@ canvas {
 }
 
 .reset-button:hover {
-    color: #f5c858;
+    color: #35f4ee;
 }
 
 .how-to-play {
@@ -257,6 +274,7 @@ canvas {
     gap: 24px;
     margin-top: 16px;
     padding: 19px 25px;
+    background: linear-gradient(110deg, rgba(13, 22, 39, .92), rgba(11, 15, 29, .86));
 }
 
 .section-title {
@@ -269,13 +287,14 @@ canvas {
     width: 37px;
     height: 37px;
     place-items: center;
-    border: 2px solid #55e6c1;
-    color: #55e6c1;
-    font-size: 15px;
+    border-radius: 4px 10px 4px 10px;
+    background: rgba(53, 244, 238, .1);
+    color: var(--accent);
+    font-size: 18px;
+    box-shadow: inset 0 0 14px rgba(53, 244, 238, .08), 0 0 14px rgba(53, 244, 238, .08);
 }
 
 .section-title h2 {
-    font-family: "Noto Sans JP", sans-serif;
     font-size: 13px;
 }
 
@@ -290,8 +309,7 @@ canvas {
 
 .control-item {
     gap: 9px;
-    color: #d3d2df;
-    font-family: "Noto Sans JP", sans-serif;
+    color: #bdcddb;
     font-size: 11px;
     white-space: nowrap;
 }
@@ -307,17 +325,20 @@ kbd,
     height: 25px;
     padding: 0 5px;
     place-items: center;
-    border: 2px solid #555d7d;
-    background: #252b49;
-    color: #f8f2d8;
-    font-family: "Press Start 2P", sans-serif;
-    font-size: 8px;
+    border: 1px solid rgba(53, 244, 238, .24);
+    border-radius: 3px 6px 3px 6px;
+    background: #101d30;
+    color: #c8fffc;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    box-shadow: inset 0 -2px rgba(53, 244, 238, .08);
 }
 
 .touch-key {
     min-width: 21px;
     height: 21px;
-    font-size: 7px;
+    font-size: 9px;
 }
 
 .touch-controls {
@@ -332,7 +353,8 @@ kbd,
 
 .page-footer span {
     margin-left: 4px;
-    color: #f5c858;
+    color: var(--neon-pink);
+    text-shadow: 0 0 10px rgba(255, 79, 200, .65);
 }
 
 @media (max-width: 700px) {
@@ -342,12 +364,17 @@ kbd,
     }
 
     .topbar {
-        margin-bottom: 14px;
+        margin-bottom: 16px;
     }
 
     .topbar-note {
         max-width: 145px;
         text-align: right;
+    }
+
+    .game-card,
+    .how-to-play {
+        border-radius: 4px 12px 4px 12px;
     }
 
     .game-heading {
@@ -387,18 +414,19 @@ kbd,
     .touch-controls button {
         width: 54px;
         height: 46px;
-        border: 2px solid #555d7d;
-        background: #252b49;
-        color: #f8f2d8;
+        border: 1px solid rgba(53, 244, 238, .32);
+        border-radius: 4px 10px 4px 10px;
+        background: #101d30;
+        color: #bafffb;
         font-size: 17px;
         touch-action: none;
         user-select: none;
+        box-shadow: 0 0 14px rgba(53, 244, 238, .1), inset 0 0 12px rgba(53, 244, 238, .05);
     }
 
     .touch-controls button[data-control="jump"] {
         margin-left: 22px;
-        border-color: #55e6c1;
-        background: #237c70;
+        background: linear-gradient(135deg, #ff4fc8, #b52bba);
         color: white;
     }
 }
