@@ -74,8 +74,17 @@ const input = { left: false, right: false, jump: false };
 let player;
 let coins;
 let enemies;
+const bossBird = {
+    x: 0,
+    y: 130,
+    width: 132,
+    height: 88,
+    hitCooldown: 0,
+    previousPhase: 0,
+};
 let cameraX = 0;
 let elapsed = 0;
+let bossElapsed = 0;
 let gameState = "playing";
 let lastTime = 0;
 let audioContext;
@@ -160,7 +169,12 @@ function resetGame() {
         direction: 1,
         alive: true,
     }));
+    bossBird.x = 1570;
+    bossBird.y = 130;
+    bossBird.hitCooldown = 0;
+    bossBird.previousPhase = 0;
     cameraX = 0;
+    bossElapsed = 0;
     gameState = "playing";
     overlay.hidden = true;
     coinCount.textContent = "0";
@@ -275,6 +289,28 @@ function finish(won) {
 function update(delta) {
     if (gameState !== "playing") return;
 
+    bossElapsed += delta;
+    const cyclePhase = bossElapsed % 8;
+    const previousPhase = bossBird.previousPhase;
+    if (cyclePhase < 4.5) {
+        bossBird.y = 130 + Math.sin(bossElapsed * 2) * 8;
+    } else if (cyclePhase < 5.3) {
+        bossBird.y = 130 + ((cyclePhase - 4.5) / 0.8) * 265;
+    } else if (cyclePhase < 6.3) {
+        bossBird.y = 395;
+    } else if (cyclePhase < 7.1) {
+        bossBird.y = 395 - ((cyclePhase - 6.3) / 0.8) * 265;
+    } else {
+        bossBird.y = 130;
+    }
+    bossBird.x = 1570 + (Math.sin(bossElapsed * 0.45) + 1) * 270;
+    bossBird.hitCooldown = Math.max(0, bossBird.hitCooldown - delta);
+    bossBird.previousPhase = cyclePhase;
+    if (cyclePhase >= 4.5 && previousPhase < 4.5
+        && Math.abs(player.x - bossBird.x) < WIDTH * 0.8) {
+        statusText.textContent = "大きな鳥が急降下！ジャンプで避けよう！";
+    }
+
     for (const enemy of enemies) {
         if (!enemy.alive) continue;
         const previousEnemyX = enemy.x;
@@ -328,6 +364,21 @@ function update(delta) {
             player.vy = -JUMP_SPEED * 0.42;
             player.grounded = false;
         }
+    }
+    player.x = resolvePlatformWallX(player, previousX, player.x);
+
+    const birdHitbox = {
+        x: bossBird.x + 28,
+        y: bossBird.y + 34,
+        width: 76,
+        height: 36,
+    };
+    if (bossBird.hitCooldown === 0 && intersects(player, birdHitbox)) {
+        player.x += player.x + player.width / 2 < birdHitbox.x + birdHitbox.width / 2 ? -32 : 32;
+        player.vy = -JUMP_SPEED * 0.45;
+        player.grounded = false;
+        bossBird.hitCooldown = 1.2;
+        statusText.textContent = "大鳥にぶつかった！体勢を立て直そう！";
     }
     player.x = resolvePlatformWallX(player, previousX, player.x);
 
@@ -649,11 +700,97 @@ function drawPlayer() {
     context.restore();
 }
 
+function drawBossBird() {
+    const x = bossBird.x - cameraX;
+    if (x + bossBird.width < -20 || x > WIDTH + 20) return;
+
+    const facing = Math.cos(bossElapsed * 0.45) >= 0 ? 1 : -1;
+    const flap = Math.sin(bossElapsed * 7) * 0.55;
+    context.save();
+    context.translate(x + bossBird.width / 2, bossBird.y + bossBird.height / 2);
+    context.scale(facing, 1);
+    context.shadowColor = "#ff4fc8";
+    context.shadowBlur = 18;
+
+    context.save();
+    context.translate(-15, -10);
+    context.rotate(-0.25 + flap);
+    context.fillStyle = "#a643a5";
+    context.beginPath();
+    context.moveTo(0, 0);
+    context.quadraticCurveTo(-36, -8, -68, -42);
+    context.quadraticCurveTo(-55, -3, -25, 13);
+    context.closePath();
+    context.fill();
+    context.restore();
+
+    context.fillStyle = "#8b2d9b";
+    context.beginPath();
+    context.moveTo(-35, 7);
+    context.lineTo(-65, -4);
+    context.lineTo(-52, 16);
+    context.lineTo(-70, 22);
+    context.lineTo(-32, 24);
+    context.closePath();
+    context.fill();
+
+    context.fillStyle = "#ff4fc8";
+    context.beginPath();
+    context.ellipse(5, 8, 39, 24, -0.08, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.arc(34, -7, 19, 0, Math.PI * 2);
+    context.fill();
+
+    context.fillStyle = "#a643a5";
+    context.beginPath();
+    context.moveTo(2, -7);
+    context.quadraticCurveTo(-15, -29, -3, -42);
+    context.quadraticCurveTo(20, -31, 20, -13);
+    context.closePath();
+    context.fill();
+
+    context.shadowBlur = 0;
+    context.fillStyle = "#f4d878";
+    context.beginPath();
+    context.moveTo(48, -5);
+    context.lineTo(69, 1);
+    context.lineTo(48, 8);
+    context.closePath();
+    context.fill();
+    context.fillStyle = "#101b32";
+    context.beginPath();
+    context.arc(39, -11, 4, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = "#fff";
+    context.fillRect(40, -13, 1.5, 1.5);
+
+    context.strokeStyle = "#ffb0eb";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(-5, 27);
+    context.lineTo(-2, 34);
+    context.lineTo(4, 27);
+    context.moveTo(16, 27);
+    context.lineTo(19, 34);
+    context.lineTo(25, 27);
+    context.stroke();
+    context.restore();
+
+    if (bossBird.y > 190 && bossBird.y < 320) {
+        context.fillStyle = "#ff4fc8";
+        context.font = "bold 22px sans-serif";
+        context.textAlign = "center";
+        context.fillText("!", x + bossBird.width / 2, bossBird.y - 12);
+    }
+}
+
 function draw() {
     drawBackground();
     for (const platform of platforms) drawPlatform(platform);
     for (const hazard of hazards) drawHazard(hazard);
     for (const enemy of enemies) drawEnemy(enemy);
+    drawBossBird();
     for (const coin of coins) drawCoin(coin);
     drawGoal();
     drawPlayer();
