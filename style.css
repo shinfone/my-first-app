@@ -1,15 +1,16 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&family=Press+Start+2P&display=swap");
 
 :root {
     color-scheme: dark;
-    font-family: "DM Sans", "Noto Sans JP", sans-serif;
-    color: #f6f7ff;
-    background: #101a31;
+    font-family: "Press Start 2P", "Noto Sans JP", sans-serif;
+    color: #f8f2d8;
+    background: #11152b;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    --muted: #9aa6c2;
-    --accent: #8c78ff;
+    --muted: #a6a9bd;
+    --accent: #55e6c1;
+    --line: #414768;
+    --panel: #1b203b;
 }
 
 * {
@@ -20,9 +21,11 @@ body {
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
-    background:
-        radial-gradient(ellipse at 50% 0%, rgba(74, 87, 160, .23), transparent 52%),
-        #101a31;
+    background-color: #11152b;
+    background-image:
+        linear-gradient(rgba(93, 111, 165, .08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(93, 111, 165, .08) 1px, transparent 1px);
+    background-size: 24px 24px;
 }
 
 button {
@@ -49,15 +52,14 @@ button {
 
 .topbar {
     justify-content: space-between;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
 .brand {
     gap: 10px;
-    color: #f8f7ff;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: .13em;
+    color: #f8f2d8;
+    font-size: 11px;
+    letter-spacing: .08em;
     text-decoration: none;
 }
 
@@ -66,16 +68,16 @@ button {
     width: 30px;
     height: 30px;
     place-items: center;
-    border: 1px solid rgba(169, 155, 255, .35);
-    border-radius: 10px;
-    color: #b9aaff;
-    font-size: 17px;
+    border: 2px solid #f5c858;
+    color: #f5c858;
+    font-size: 15px;
 }
 
 .topbar-note,
 .section-title p,
 .page-footer {
     color: var(--muted);
+    font-family: "Noto Sans JP", sans-serif;
     font-size: 12px;
 }
 
@@ -86,10 +88,9 @@ button {
 .game-card,
 .how-to-play {
     overflow: hidden;
-    border: 1px solid rgba(151, 167, 215, .15);
-    border-radius: 18px;
-    background: #18243e;
-    box-shadow: 0 24px 70px rgba(4, 9, 25, .24);
+    border: 2px solid var(--line);
+    background: var(--panel);
+    box-shadow: 5px 5px 0 #080b18;
 }
 
 .game-heading {
@@ -99,11 +100,10 @@ button {
 }
 
 .eyebrow {
-    margin: 0 0 6px;
-    color: #a99aff;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: .16em;
+    margin: 0 0 9px;
+    color: #f5c858;
+    font-size: 8px;
+    letter-spacing: .08em;
 }
 
 .game-heading h1,
@@ -113,39 +113,37 @@ button {
 }
 
 .game-heading h1 {
+    font-family: "Noto Sans JP", sans-serif;
     font-size: 21px;
-    font-weight: 700;
-    letter-spacing: .015em;
+    font-weight: 800;
 }
 
 .score {
     display: flex;
     align-items: center;
-    gap: 7px;
-    padding: 9px 14px;
-    border: 1px solid rgba(242, 197, 94, .16);
-    border-radius: 11px;
-    background: rgba(244, 190, 74, .08);
-    color: #ffd36f;
-    font-size: 16px;
-    font-weight: 800;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 2px solid #9b793b;
+    background: #302a35;
+    color: #f5c858;
+    font-size: 13px;
 }
 
 .coin-icon {
-    font-size: 13px;
-    text-shadow: 0 0 10px rgba(255, 203, 81, .55);
+    font-size: 12px;
 }
 
 .score-total {
-    color: #aab3ca;
-    font-size: 12px;
-    font-weight: 500;
+    color: #c0b8a5;
+    font-size: 9px;
 }
 
 .canvas-wrap {
     position: relative;
     overflow: hidden;
-    background: #18294a;
+    border-top: 2px solid var(--line);
+    border-bottom: 2px solid var(--line);
+    background: #11152b;
 }
 
 canvas {
@@ -153,6 +151,7 @@ canvas {
     width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
+    image-rendering: pixelated;
     touch-action: none;
 }
 
@@ -161,8 +160,7 @@ canvas {
     inset: 0;
     display: grid;
     place-items: center;
-    background: rgba(8, 14, 30, .58);
-    backdrop-filter: blur(5px);
+    background: rgba(8, 11, 24, .76);
 }
 
 .game-overlay[hidden] {
@@ -170,23 +168,24 @@ canvas {
 }
 
 .overlay-card {
-    width: min(330px, calc(100% - 32px));
+    width: min(360px, calc(100% - 32px));
     padding: 27px 24px;
-    border: 1px solid rgba(178, 168, 255, .28);
-    border-radius: 16px;
-    background: #202b49;
+    border: 3px solid #f5c858;
+    background: #1b203b;
     text-align: center;
-    box-shadow: 0 18px 55px rgba(5, 8, 20, .38);
+    box-shadow: 6px 6px 0 #080b18;
 }
 
 .overlay-card h2 {
-    margin: 4px 0 8px;
-    font-size: 27px;
+    margin: 8px 0;
+    color: #55e6c1;
+    font-size: 18px;
 }
 
 .overlay-card > p:not(.eyebrow) {
     margin: 0 0 20px;
-    color: #b5bfd5;
+    color: #c5c6d1;
+    font-family: "Noto Sans JP", sans-serif;
     font-size: 13px;
 }
 
@@ -198,17 +197,16 @@ canvas {
 }
 
 .overlay-card button {
-    padding: 11px 18px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #a194ff, #7865ec);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 700;
-    box-shadow: 0 7px 20px rgba(122, 103, 240, .25);
+    padding: 12px 14px;
+    border: 2px solid #55e6c1;
+    background: #237c70;
+    color: #fff8dc;
+    font-size: 9px;
 }
 
-.overlay-card button:hover {
-    filter: brightness(1.08);
+.overlay-card button:hover,
+.touch-controls button:hover {
+    filter: brightness(1.2);
 }
 
 .game-footer {
@@ -225,7 +223,8 @@ canvas {
 
 .game-footer p {
     margin: 0;
-    color: #b5bfd5;
+    color: #c5c6d1;
+    font-family: "Noto Sans JP", sans-serif;
     font-size: 12px;
 }
 
@@ -233,14 +232,13 @@ canvas {
 .reset-button {
     padding: 6px 0 6px 12px;
     background: transparent;
-    color: #a99aff;
-    font-size: 12px;
-    font-weight: 600;
+    color: #55e6c1;
+    font-size: 8px;
     white-space: nowrap;
 }
 
 .bgm-button[aria-pressed="true"] {
-    color: #70f2df;
+    color: #f5c858;
 }
 
 .bgm-button:disabled {
@@ -249,7 +247,7 @@ canvas {
 }
 
 .reset-button:hover {
-    color: #d0c8ff;
+    color: #f5c858;
 }
 
 .how-to-play {
@@ -259,7 +257,6 @@ canvas {
     gap: 24px;
     margin-top: 16px;
     padding: 19px 25px;
-    background: rgba(24, 36, 62, .72);
 }
 
 .section-title {
@@ -272,13 +269,13 @@ canvas {
     width: 37px;
     height: 37px;
     place-items: center;
-    border-radius: 11px;
-    background: rgba(141, 120, 255, .13);
-    color: #b6aaff;
-    font-size: 18px;
+    border: 2px solid #55e6c1;
+    color: #55e6c1;
+    font-size: 15px;
 }
 
 .section-title h2 {
+    font-family: "Noto Sans JP", sans-serif;
     font-size: 13px;
 }
 
@@ -293,7 +290,8 @@ canvas {
 
 .control-item {
     gap: 9px;
-    color: #c1c9dc;
+    color: #d3d2df;
+    font-family: "Noto Sans JP", sans-serif;
     font-size: 11px;
     white-space: nowrap;
 }
@@ -309,19 +307,17 @@ kbd,
     height: 25px;
     padding: 0 5px;
     place-items: center;
-    border: 1px solid rgba(177, 190, 225, .19);
-    border-radius: 6px;
-    background: #253452;
-    color: #e2e6f3;
-    font-family: inherit;
-    font-size: 10px;
-    font-weight: 600;
+    border: 2px solid #555d7d;
+    background: #252b49;
+    color: #f8f2d8;
+    font-family: "Press Start 2P", sans-serif;
+    font-size: 8px;
 }
 
 .touch-key {
     min-width: 21px;
     height: 21px;
-    font-size: 9px;
+    font-size: 7px;
 }
 
 .touch-controls {
@@ -336,7 +332,7 @@ kbd,
 
 .page-footer span {
     margin-left: 4px;
-    color: #a99aff;
+    color: #f5c858;
 }
 
 @media (max-width: 700px) {
@@ -346,17 +342,12 @@ kbd,
     }
 
     .topbar {
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
 
     .topbar-note {
         max-width: 145px;
         text-align: right;
-    }
-
-    .game-card,
-    .how-to-play {
-        border-radius: 14px;
     }
 
     .game-heading {
@@ -396,10 +387,9 @@ kbd,
     .touch-controls button {
         width: 54px;
         height: 46px;
-        border: 1px solid rgba(169, 155, 255, .26);
-        border-radius: 12px;
-        background: #202d4b;
-        color: #dedaff;
+        border: 2px solid #555d7d;
+        background: #252b49;
+        color: #f8f2d8;
         font-size: 17px;
         touch-action: none;
         user-select: none;
@@ -407,7 +397,8 @@ kbd,
 
     .touch-controls button[data-control="jump"] {
         margin-left: 22px;
-        background: #6858ce;
+        border-color: #55e6c1;
+        background: #237c70;
         color: white;
     }
 }

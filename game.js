@@ -1,5 +1,5 @@
 const canvas = document.querySelector("#game");
-const context = canvas.getContext("2d");
+const displayContext = canvas.getContext("2d");
 const coinCount = document.querySelector("#coin-count");
 const statusText = document.querySelector("#game-status");
 const overlay = document.querySelector("#game-overlay");
@@ -12,6 +12,20 @@ const bgmButton = document.querySelector("#bgm-button");
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
+const pixelCanvas = document.createElement("canvas");
+pixelCanvas.width = WIDTH / 4;
+pixelCanvas.height = HEIGHT / 4;
+const context = pixelCanvas.getContext("2d");
+const pixelPalette = [
+    [23, 27, 58],
+    [52, 50, 83],
+    [69, 68, 103],
+    [116, 70, 93],
+    [217, 87, 115],
+    [245, 200, 88],
+    [85, 230, 193],
+    [255, 241, 184],
+];
 const PLATFORM_BOTTOM = HEIGHT + 20;
 const WORLD_WIDTH = 3000;
 const GROUND_Y = 470;
@@ -93,10 +107,10 @@ function playBgmNote() {
     const startTime = audioContext.currentTime;
     const oscillator = audioContext.createOscillator();
     const volume = audioContext.createGain();
-    oscillator.type = "sine";
+    oscillator.type = "square";
     oscillator.frequency.value = bgmNotes[bgmNoteIndex];
     volume.gain.setValueAtTime(0.0001, startTime);
-    volume.gain.exponentialRampToValueAtTime(0.045, startTime + 0.025);
+    volume.gain.exponentialRampToValueAtTime(0.025, startTime + 0.025);
     volume.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.24);
     oscillator.connect(volume);
     volume.connect(audioContext.destination);
@@ -351,16 +365,10 @@ function update(delta) {
 
 function drawBackground() {
     const gradient = context.createLinearGradient(0, 0, 0, HEIGHT);
-    gradient.addColorStop(0, "#080f27");
-    gradient.addColorStop(0.58, "#172653");
-    gradient.addColorStop(1, "#452b68");
+    gradient.addColorStop(0, "#171b3a");
+    gradient.addColorStop(0.62, "#34315b");
+    gradient.addColorStop(1, "#74465d");
     context.fillStyle = gradient;
-    context.fillRect(0, 0, WIDTH, HEIGHT);
-
-    const glow = context.createRadialGradient(WIDTH * 0.72, 340, 10, WIDTH * 0.72, 340, 440);
-    glow.addColorStop(0, "rgba(44, 224, 220, .2)");
-    glow.addColorStop(1, "rgba(44, 224, 220, 0)");
-    context.fillStyle = glow;
     context.fillRect(0, 0, WIDTH, HEIGHT);
 
     for (const star of stars) {
@@ -368,14 +376,14 @@ function drawBackground() {
         const wrappedX = ((x % (WIDTH + 20)) + WIDTH + 20) % (WIDTH + 20) - 10;
         const twinkle = 0.55 + Math.sin(elapsed * 2 + star.phase) * 0.25;
         context.globalAlpha = twinkle;
-        context.fillStyle = "#e2e5ff";
+        context.fillStyle = "#fff1b8";
         context.fillRect(wrappedX, star.y, star.size, star.size);
     }
     context.globalAlpha = 1;
 
-    drawSkyline(0.12, 150, 385, 95, "#202d55", "rgba(101, 135, 211, .2)");
-    drawSkyline(0.28, 120, 420, 155, "#172246", "rgba(57, 216, 225, .45)");
-    drawSkyline(0.48, 96, 455, 205, "#111a38", "rgba(201, 83, 226, .42)");
+    drawSkyline(0.12, 150, 385, 95, "#454467", "rgba(245, 200, 88, .45)");
+    drawSkyline(0.28, 120, 420, 155, "#343253", "rgba(85, 230, 193, .58)");
+    drawSkyline(0.48, 96, 455, 205, "#252843", "rgba(245, 200, 88, .62)");
 }
 
 function drawSkyline(parallax, segmentWidth, baseY, maxHeight, buildingColor, windowColor) {
@@ -405,8 +413,8 @@ function drawSkyline(parallax, segmentWidth, baseY, maxHeight, buildingColor, wi
             }
         }
         context.globalAlpha = 1;
-        context.fillStyle = "rgba(58, 224, 230, .55)";
-        context.fillRect(x + width * 0.48, top + 4, Math.min(18, width * 0.22), 2);
+        context.fillStyle = "#55e6c1";
+        context.fillRect(x + width * 0.48, top + 4, Math.min(18, width * 0.22), 3);
     }
 }
 
@@ -414,19 +422,21 @@ function drawPlatform(platform) {
     const x = platform.x - cameraX;
     if (x + platform.width < -20 || x > WIDTH + 20) return;
 
-    context.fillStyle = "#263957";
+    context.fillStyle = "#343253";
     context.fillRect(x, platform.y, platform.width, PLATFORM_BOTTOM - platform.y);
-    context.fillStyle = "#83d7c2";
-    context.fillRect(x, platform.y, platform.width, 7);
-    context.fillStyle = "rgba(179, 247, 222, .35)";
-    context.fillRect(x + 8, platform.y + 11, Math.max(0, platform.width - 16), 2);
+    context.fillStyle = "#55e6c1";
+    context.fillRect(x, platform.y, platform.width, 8);
+    context.fillStyle = "#252843";
+    for (let tileX = 8; tileX < platform.width - 8; tileX += 24) {
+        context.fillRect(x + tileX, platform.y + 18, 12, 8);
+    }
 }
 
 function drawHazard(hazard) {
     const x = hazard.x - cameraX;
     if (x + hazard.width < -10 || x > WIDTH + 10) return;
     const teeth = Math.max(1, Math.floor(hazard.width / 16));
-    context.fillStyle = "#ff718c";
+    context.fillStyle = "#ff765e";
     context.beginPath();
     context.moveTo(x, hazard.y + hazard.height);
     for (let index = 0; index < teeth; index += 1) {
@@ -447,35 +457,30 @@ function drawEnemy(enemy) {
     context.save();
     context.translate(x, enemy.y + bob);
 
-    context.strokeStyle = "#ff83cb";
+    context.strokeStyle = "#f5c858";
     context.lineWidth = 2;
     context.beginPath();
     context.moveTo(enemy.width / 2, 3);
     context.lineTo(enemy.width / 2, -2);
     context.stroke();
-    context.fillStyle = "#ffd6f1";
+    context.fillStyle = "#fff1b8";
     context.beginPath();
     context.arc(enemy.width / 2, -3, 2.5, 0, Math.PI * 2);
     context.fill();
 
-    const bodyGradient = context.createLinearGradient(0, 2, 0, enemy.height);
-    bodyGradient.addColorStop(0, "#ff8bd4");
-    bodyGradient.addColorStop(1, "#a643a5");
-    context.fillStyle = bodyGradient;
-    context.beginPath();
-    context.roundRect(1, 3, enemy.width - 2, enemy.height - 3, 10);
-    context.fill();
-    context.fillStyle = "#321b4b";
-    context.beginPath();
-    context.ellipse(12, 14, 3, 4, 0, 0, Math.PI * 2);
-    context.ellipse(22, 14, 3, 4, 0, 0, Math.PI * 2);
-    context.fill();
-    context.fillStyle = "#fff0fb";
-    context.fillRect(11, 12, 1.5, 1.5);
-    context.fillRect(21, 12, 1.5, 1.5);
-    context.fillStyle = "#ffcf66";
-    context.fillRect(8, enemy.height - 3, 5, 3);
-    context.fillRect(21, enemy.height - 3, 5, 3);
+    context.fillStyle = "#d95773";
+    context.fillRect(4, 5, enemy.width - 8, enemy.height - 8);
+    context.fillRect(1, 10, 4, 10);
+    context.fillRect(enemy.width - 5, 10, 4, 10);
+    context.fillStyle = "#5a294b";
+    context.fillRect(8, 11, 5, 5);
+    context.fillRect(21, 11, 5, 5);
+    context.fillStyle = "#fff1b8";
+    context.fillRect(9, 11, 2, 2);
+    context.fillRect(22, 11, 2, 2);
+    context.fillStyle = "#f5c858";
+    context.fillRect(7, enemy.height - 3, 7, 3);
+    context.fillRect(20, enemy.height - 3, 7, 3);
     context.restore();
 }
 
@@ -487,14 +492,14 @@ function drawCoin(coin) {
     context.save();
     context.translate(x, coin.y);
     context.scale(pulse, 1);
-    context.fillStyle = "#ffd36f";
+    context.fillStyle = "#f5c858";
     context.beginPath();
     context.arc(0, 0, 10, 0, Math.PI * 2);
     context.fill();
-    context.strokeStyle = "#fff0ad";
+    context.strokeStyle = "#fff1b8";
     context.lineWidth = 2;
     context.stroke();
-    context.fillStyle = "#b88636";
+    context.fillStyle = "#9b793b";
     context.fillRect(-1, -5, 2, 10);
     context.restore();
 }
@@ -502,16 +507,16 @@ function drawCoin(coin) {
 function drawGoal() {
     const x = WORLD_WIDTH - 112 - cameraX;
     if (x < -50 || x > WIDTH + 50) return;
-    context.fillStyle = "#d9e1f7";
+    context.fillStyle = "#f8f2d8";
     context.fillRect(x, GROUND_Y - 118, 5, 118);
-    context.fillStyle = "#a99aff";
+    context.fillStyle = "#d95773";
     context.beginPath();
     context.moveTo(x + 5, GROUND_Y - 116);
     context.lineTo(x + 53, GROUND_Y - 99);
     context.lineTo(x + 5, GROUND_Y - 82);
     context.closePath();
     context.fill();
-    context.fillStyle = "#f3f4ff";
+    context.fillStyle = "#55e6c1";
     context.beginPath();
     context.arc(x + 2.5, GROUND_Y - 121, 6, 0, Math.PI * 2);
     context.fill();
@@ -526,7 +531,7 @@ function drawPlayer() {
     context.translate(x, y + bob);
 
     const facing = input.left ? -1 : 1;
-    context.strokeStyle = "#74f6e0";
+    context.strokeStyle = "#55e6c1";
     context.lineWidth = 2;
     context.beginPath();
     context.moveTo(11, 7);
@@ -534,61 +539,64 @@ function drawPlayer() {
     context.moveTo(22, 7);
     context.quadraticCurveTo(25, 1, 23, -3);
     context.stroke();
-    context.shadowColor = "#63ffe6";
-    context.shadowBlur = 9;
-    context.fillStyle = "#c7fff2";
+    context.fillStyle = "#fff1b8";
     context.beginPath();
     context.arc(10, -3, 2.5, 0, Math.PI * 2);
     context.arc(23, -3, 2.5, 0, Math.PI * 2);
     context.fill();
-    context.shadowBlur = 0;
-
-    const headGradient = context.createLinearGradient(4, 2, 28, 27);
-    headGradient.addColorStop(0, "#b8ffe4");
-    headGradient.addColorStop(1, "#48cbbd");
-    context.fillStyle = headGradient;
-    context.beginPath();
-    context.ellipse(16, 14, 14, 13, 0, 0, Math.PI * 2);
-    context.fill();
-    context.strokeStyle = "#d5fff3";
-    context.lineWidth = 1.5;
-    context.stroke();
-
-    context.fillStyle = "#122343";
-    context.beginPath();
-    context.ellipse(facing === 1 ? 20 : 12, 14, 4.1, 6.2, 0, 0, Math.PI * 2);
-    context.ellipse(facing === 1 ? 11 : 21, 14, 3.1, 5.2, 0, 0, Math.PI * 2);
-    context.fill();
-    context.fillStyle = "#f2fffa";
-    context.beginPath();
-    context.arc(facing === 1 ? 21 : 13, 12, 1.3, 0, Math.PI * 2);
-    context.fill();
+    context.fillStyle = "#55e6c1";
+    context.fillRect(5, 5, 22, 18);
+    context.fillRect(9, 1, 4, 5);
+    context.fillRect(20, 1, 4, 5);
+    context.fillStyle = "#252843";
+    context.fillRect(facing === 1 ? 18 : 10, 10, 4, 6);
+    context.fillRect(facing === 1 ? 10 : 20, 10, 3, 5);
+    context.fillStyle = "#f8f2d8";
+    context.fillRect(facing === 1 ? 20 : 11, 10, 2, 2);
     context.strokeStyle = "#188c88";
     context.lineWidth = 1;
     context.beginPath();
-    context.arc(16, 20, 2.3, 0.2, Math.PI - 0.2);
+    context.moveTo(14, 19);
+    context.lineTo(18, 19);
     context.stroke();
 
-    const suitGradient = context.createLinearGradient(0, 25, 0, 44);
-    suitGradient.addColorStop(0, "#9b7cff");
-    suitGradient.addColorStop(1, "#5742bd");
-    context.fillStyle = suitGradient;
-    context.beginPath();
-    context.roundRect(1, 25, 30, 18, 7);
-    context.fill();
-    context.fillStyle = "#c9baff";
+    context.fillStyle = "#d95773";
+    context.fillRect(3, 25, 26, 15);
+    context.fillStyle = "#f8f2d8";
     context.fillRect(7, 39, 7, 5);
     context.fillRect(20, 39, 7, 5);
-    context.fillStyle = "#70f2df";
-    context.beginPath();
-    context.roundRect(12, 29, 8, 6, 2);
-    context.fill();
-    context.fillStyle = "#f4d878";
-    context.fillRect(15, 30, 2, 4);
+    context.fillStyle = "#f5c858";
+    context.fillRect(12, 29, 8, 6);
     context.restore();
 }
 
+function applyPixelPalette() {
+    const image = context.getImageData(0, 0, pixelCanvas.width, pixelCanvas.height);
+    const pixels = image.data;
+    for (let pixel = 0; pixel < pixels.length; pixel += 4) {
+        if (pixels[pixel + 3] === 0) continue;
+        let closestColor = pixelPalette[0];
+        let closestDistance = Infinity;
+        for (const color of pixelPalette) {
+            const red = pixels[pixel] - color[0];
+            const green = pixels[pixel + 1] - color[1];
+            const blue = pixels[pixel + 2] - color[2];
+            const distance = red * red + green * green + blue * blue;
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestColor = color;
+            }
+        }
+        pixels[pixel] = closestColor[0];
+        pixels[pixel + 1] = closestColor[1];
+        pixels[pixel + 2] = closestColor[2];
+    }
+    context.putImageData(image, 0, 0);
+}
+
 function draw() {
+    context.save();
+    context.setTransform(pixelCanvas.width / WIDTH, 0, 0, pixelCanvas.height / HEIGHT, 0, 0);
     drawBackground();
     for (const platform of platforms) drawPlatform(platform);
     for (const hazard of hazards) drawHazard(hazard);
@@ -596,6 +604,11 @@ function draw() {
     for (const coin of coins) drawCoin(coin);
     drawGoal();
     drawPlayer();
+    context.restore();
+    applyPixelPalette();
+    displayContext.imageSmoothingEnabled = false;
+    displayContext.clearRect(0, 0, WIDTH, HEIGHT);
+    displayContext.drawImage(pixelCanvas, 0, 0, WIDTH, HEIGHT);
 }
 
 function frame(timestamp) {
