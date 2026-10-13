@@ -12,6 +12,7 @@ const bgmButton = document.querySelector("#bgm-button");
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
+const ENTITY_SCALE = window.matchMedia("(max-width: 1500px)").matches ? 1.4 : 1;
 const PLATFORM_BOTTOM = HEIGHT + 20;
 const WORLD_WIDTH = 3000;
 const GROUND_Y = 470;
@@ -77,8 +78,8 @@ let enemies;
 const bossBird = {
     x: 0,
     y: 130,
-    width: 132,
-    height: 88,
+    width: 132 * ENTITY_SCALE,
+    height: 88 * ENTITY_SCALE,
     hitCooldown: 0,
     previousPhase: 0,
 };
@@ -158,13 +159,21 @@ if (!AudioContextClass) {
 }
 
 function resetGame() {
-    player = { x: 70, y: GROUND_Y - 44, width: 32, height: 44, vx: 0, vy: 0, grounded: true };
+    player = {
+        x: 70,
+        y: GROUND_Y - 44 * ENTITY_SCALE,
+        width: 32 * ENTITY_SCALE,
+        height: 44 * ENTITY_SCALE,
+        vx: 0,
+        vy: 0,
+        grounded: true,
+    };
     coins = coinPositions.map((coin) => ({ ...coin, collected: false }));
     enemies = enemyPositions.map((enemy) => ({
         ...enemy,
-        y: GROUND_Y - 27,
-        width: 34,
-        height: 26,
+        y: GROUND_Y - 27 * ENTITY_SCALE,
+        width: 34 * ENTITY_SCALE,
+        height: 26 * ENTITY_SCALE,
         speed: 38,
         direction: 1,
         alive: true,
@@ -368,10 +377,10 @@ function update(delta) {
     player.x = resolvePlatformWallX(player, previousX, player.x);
 
     const birdHitbox = {
-        x: bossBird.x + 28,
-        y: bossBird.y + 34,
-        width: 76,
-        height: 36,
+        x: bossBird.x + 28 * ENTITY_SCALE,
+        y: bossBird.y + 34 * ENTITY_SCALE,
+        width: 76 * ENTITY_SCALE,
+        height: 36 * ENTITY_SCALE,
     };
     if (bossBird.hitCooldown === 0 && intersects(player, birdHitbox)) {
         player.x += player.x + player.width / 2 < birdHitbox.x + birdHitbox.width / 2 ? -32 : 32;
@@ -543,17 +552,20 @@ function drawEnemy(enemy) {
     if (!enemy.alive) return;
     const x = enemy.x - cameraX;
     if (x + enemy.width < -10 || x > WIDTH + 10) return;
+    const width = enemy.width / ENTITY_SCALE;
+    const height = enemy.height / ENTITY_SCALE;
     const bob = (Math.sin(elapsed * 4 + enemy.minX) - 1) * 1.5;
     context.save();
     context.translate(x, enemy.y + bob);
+    context.scale(ENTITY_SCALE, ENTITY_SCALE);
 
     context.shadowColor = "#ff4fc8";
     context.shadowBlur = 12;
     context.strokeStyle = "#ff83dc";
     context.lineWidth = 2;
     context.beginPath();
-    context.moveTo(enemy.width / 2, 3);
-    context.lineTo(enemy.width / 2, -2);
+    context.moveTo(width / 2, 3);
+    context.lineTo(width / 2, -2);
     context.stroke();
     context.fillStyle = "#ffd6f1";
     context.beginPath();
@@ -561,12 +573,12 @@ function drawEnemy(enemy) {
     context.fill();
     context.shadowBlur = 0;
 
-    const bodyGradient = context.createLinearGradient(0, 2, 0, enemy.height);
+    const bodyGradient = context.createLinearGradient(0, 2, 0, height);
     bodyGradient.addColorStop(0, "#ff8bd4");
     bodyGradient.addColorStop(1, "#a643a5");
     context.fillStyle = bodyGradient;
     context.beginPath();
-    context.roundRect(1, 3, enemy.width - 2, enemy.height - 3, 10);
+    context.roundRect(1, 3, width - 2, height - 3, 10);
     context.fill();
     context.fillStyle = "#321b4b";
     context.beginPath();
@@ -577,8 +589,8 @@ function drawEnemy(enemy) {
     context.fillRect(11, 12, 1.5, 1.5);
     context.fillRect(21, 12, 1.5, 1.5);
     context.fillStyle = "#ffcf66";
-    context.fillRect(8, enemy.height - 3, 5, 3);
-    context.fillRect(21, enemy.height - 3, 5, 3);
+    context.fillRect(8, height - 3, 5, 3);
+    context.fillRect(21, height - 3, 5, 3);
     context.restore();
 }
 
@@ -636,6 +648,7 @@ function drawPlayer() {
     const bob = player.grounded && moving ? (Math.sin(elapsed * 19) - 1) * 2 : 0;
     context.save();
     context.translate(x, y + bob);
+    context.scale(ENTITY_SCALE, ENTITY_SCALE);
 
     const facing = input.left ? -1 : 1;
     context.strokeStyle = "#74f6e0";
@@ -708,7 +721,7 @@ function drawBossBird() {
     const flap = Math.sin(bossElapsed * 7) * 0.55;
     context.save();
     context.translate(x + bossBird.width / 2, bossBird.y + bossBird.height / 2);
-    context.scale(facing, 1);
+    context.scale(facing * ENTITY_SCALE, ENTITY_SCALE);
     context.shadowColor = "#ff4fc8";
     context.shadowBlur = 18;
 
